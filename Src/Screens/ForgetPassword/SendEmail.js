@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import axios from 'axios';
+import {useDispatch} from 'react-redux';
+import {setResetEmail} from '../../Redux/Actions/UserAction';
 
-const SendEmail = ({ changeScreen }) => {
+const SendEmail = ({changeScreen}) => {
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
 
   const handleEmailChange = text => {
     setEmail(text);
-    // Clear email error when the user starts typing
     setEmailError('');
   };
 
@@ -20,25 +29,25 @@ const SendEmail = ({ changeScreen }) => {
     }
 
     try {
-      // Replace with the actual API endpoint for password reset
       const apiUrl = 'http://182.176.169.225:19008/api/v1/users/forgotPassword';
 
-      const response = await axios.post(apiUrl, { email });
+      const response = await axios.post(apiUrl, {email});
 
-      // Log the API response to the console
       console.log('API Response:', JSON.stringify(response));
 
-      // Check if the request was successful (status code 2xx)
       if (response.status === 200) {
-        // Handle success, maybe show a success message or navigate to another screen
-        console.log('Password reset email sent successfully');
+        dispatch(setResetEmail(email));
+        console.log('Email dispatched to Redux:', email);
+
         changeScreen('VerifyOTP');
       } else {
-        // Handle errors, maybe show an error message
         console.error('Failed to send password reset email');
       }
     } catch (error) {
-      console.error('Error occurred while sending password reset request:', error);
+      console.error(
+        'Error occurred while sending password reset request:',
+        error,
+      );
     }
   };
 
@@ -58,7 +67,7 @@ const SendEmail = ({ changeScreen }) => {
 
       <View style={styles.container3}>
         <TouchableOpacity style={styles.loginButton} onPress={handleSend}>
-          <Text style={{ color: '#FFFF', fontSize: 14 }}>Send</Text>
+          <Text style={{color: '#FFFF', fontSize: 14}}>Send</Text>
         </TouchableOpacity>
       </View>
     </View>

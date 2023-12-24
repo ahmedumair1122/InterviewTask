@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
+import {useSelector, useDispatch} from 'react-redux';
 
 const ResetPassword = () => {
+  const token = useSelector(state => state.verificationData.data);
+  console.log(token);
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isconPasswordVisible, setIsconPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
   const togglePasswordVisibility = () => {
-    setIsPasswordVisible((prev) => !prev);
+    setIsPasswordVisible(prev => !prev);
   };
 
-  const toggleconPasswordVisibility = () => {
-    setIsconPasswordVisible((prev) => !prev);
+  const toggleConfirmPasswordVisibility = () => {
+    setIsConfirmPasswordVisible(prev => !prev);
   };
 
   const resetPassword = async () => {
-    // Validate passwords
     if (!password || !confirmPassword) {
       Alert.alert('Error', 'Please enter both password and confirm password.');
       return;
@@ -28,35 +40,35 @@ const ResetPassword = () => {
       return;
     }
 
-    try {
-      // Replace with the actual API endpoint for resetting the password
-      const apiUrl = 'http://182.176.169.225:19008/api/v1/users/resetPassword';
-
-      // Make the API call to reset the password
-      const response = await axios.post(apiUrl, { newPassword: password }, {
-        headers: {
-          'Content-Type': 'application/json',
-          // Add any other required headers here
-        },
-      });
-
-      if (response.status === 200) {
-        Alert.alert('Success', 'Password reset successfully.');
-        // Handle success, you might want to navigate to a login screen or another screen
-      } else {
-        // Handle errors, show an error message
-        Alert.alert('Error', 'Failed to reset password. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error occurred while resetting password:', error);
-      Alert.alert('Error', 'An error occurred while resetting password. Please try again.');
-    }
+    let data = JSON.stringify({
+      "password": password,
+      "confirmPassword": confirmPassword,
+    });
+    
+    let config = {
+      method: 'Patch',
+      maxBodyLength: Infinity,
+      url: 'http://182.176.169.225:19008/api/v1/users/resetPassword',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${token}`,
+      },
+      data : data
+    };
+    
+    axios.request(config)
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+    
   };
-
   return (
     <View style={styles.container1}>
       <Text style={styles.H1}>Password</Text>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{flexDirection: 'row'}}>
         <TextInput
           style={styles.TextInput}
           keyboardType="default"
@@ -64,30 +76,40 @@ const ResetPassword = () => {
           placeholderTextColor={'#9EA1AE'}
           placeholder="Enter your Password"
           value={password}
-          onChangeText={(text) => setPassword(text)}
+          onChangeText={text => setPassword(text)}
         />
-        <TouchableOpacity style={styles.eyeButton} onPress={togglePasswordVisibility}>
-          <Image style={styles.image} source={require('../../Assets/Icons/Hide.png')} />
+        <TouchableOpacity
+          style={styles.eyeButton}
+          onPress={togglePasswordVisibility}>
+          <Image
+            style={styles.image}
+            source={require('../../Assets/Icons/Hide.png')}
+          />
         </TouchableOpacity>
       </View>
       <Text style={styles.H1}>Confirm Password</Text>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{flexDirection: 'row'}}>
         <TextInput
           style={styles.TextInput}
           keyboardType="default"
-          secureTextEntry={!isconPasswordVisible}
+          secureTextEntry={!isConfirmPasswordVisible}
           placeholderTextColor={'#9EA1AE'}
           placeholder="Re-Enter your Password"
           value={confirmPassword}
-          onChangeText={(text) => setConfirmPassword(text)}
+          onChangeText={text => setConfirmPassword(text)}
         />
-        <TouchableOpacity style={styles.eyeButton} onPress={toggleconPasswordVisibility}>
-          <Image style={styles.image} source={require('../../Assets/Icons/Hide.png')} />
+        <TouchableOpacity
+          style={styles.eyeButton}
+          onPress={toggleConfirmPasswordVisibility}>
+          <Image
+            style={styles.image}
+            source={require('../../Assets/Icons/Hide.png')}
+          />
         </TouchableOpacity>
       </View>
       <View style={styles.container3}>
         <TouchableOpacity style={styles.Button} onPress={resetPassword}>
-          <Text style={{ color: '#FFFF', fontSize: 14 }}>Reset Password</Text>
+          <Text style={{color: '#FFFF', fontSize: 14}}>Reset Password</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -97,32 +119,15 @@ const ResetPassword = () => {
 export default ResetPassword;
 
 const styles = StyleSheet.create({
-  container: {
+  container1: {
     flex: 1,
-
-    marginVertical: '5%',
-    width: '90%',
+    justifyContent: 'space-evenly',
+    alignContent: 'center',
   },
   H1: {
     fontWeight: '700',
     color: '#090D20',
     fontSize: 16,
-  },
-  H2: {
-    fontWeight: '400',
-    color: '#9EA1AE',
-    fontSize: 12,
-  },
-  container1: {
-    flex: 1,
-    justifyContent: 'space-evenly',
-
-    alignContent: 'center',
-  },
-  ScrollView: {
-    flex: 1,
-    marginTop: 10,
-    alignContent: 'center',
   },
   TextInput: {
     borderWidth: 1,
@@ -145,7 +150,6 @@ const styles = StyleSheet.create({
   },
   Button: {
     backgroundColor: '#384DAA',
-
     height: 59,
     width: '80%',
     borderRadius: 30,
@@ -155,30 +159,5 @@ const styles = StyleSheet.create({
   image: {
     height: 20,
     width: 25,
-  },
-  errorContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  errorMessage: {
-    color: 'red',
-    fontSize: 16,
-    marginTop: 5,
-  },
-
-  verifyscreenContainer: {
-    flex: 1,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    alignContent: 'center',
-  },
-  verifyscreencontainer1: {
-    flex: 0.28,
-    backgroundColor: '#FFF5DD',
-    borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignContent: 'center',
-    justifyContent: 'space-between',
   },
 });
